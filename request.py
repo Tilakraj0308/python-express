@@ -54,38 +54,42 @@ class Request:
         return request_header
     
     def getRequestBody(self):
-        request_body = {}
-        if self.data.split('\r\n\r\n')[1] == '':
-            return request_body
-        contentType = self.getContentType()
-        # For form-data
-        if contentType == 'multipart/form-data':
-            boundary = self.data.split('boundary=')[1].split('\r\n')[0]
-            params = '\r\n'.join('\r\n'.join('\r\n'.join(self.data.split(boundary+'\r\n')[2:]).split('--'+boundary+'--')).split('\r\n\r\n'))
-            for param in params.split('--'):
-                keyValue = param.split(';')[1].split('\r\n')
-                key = keyValue[0].split('=')[1]
-                value = keyValue[1]
-                request_body[key[1:-1]] = value
-            return request_body
+        try:
+            request_body = {}
+            if self.data.split('\r\n\r\n')[1] == '':
+                return request_body
+            contentType = self.getContentType()
+            # For form-data
+            if contentType == 'multipart/form-data':
+                boundary = self.data.split('boundary=')[1].split('\r\n')[0]
+                params = '\r\n'.join('\r\n'.join('\r\n'.join(self.data.split(boundary+'\r\n')[2:]).split('--'+boundary+'--')).split('\r\n\r\n'))
+                for param in params.split('--'):
+                    keyValue = param.split(';')[1].split('\r\n')
+                    key = keyValue[0].split('=')[1]
+                    value = keyValue[1]
+                    request_body[key[1:-1]] = value
+                return request_body
+                
+            # For raw-text or raw-json data
+            elif contentType in ['text/plain', 'application/json']:
+                data = self.data.split('\r\n\r\n')[1]
+                request_body = json.loads(str(data))
+                return request_body
             
-        # For raw-text or raw-json data
-        elif contentType in ['text/plain', 'application/json']:
-            data = self.data.split('\r\n\r\n')[1]
-            request_body = json.loads(str(data))
-            return request_body
-        
-        # For url-encoded data
-        elif contentType == 'application/x-www-form-urlencoded':
-            data = self.data.split('\r\n\r\n')[1]
-            for pair in data.split('&'):
-                key, value = pair.split('=')
-                request_body[key] = value
-            return request_body
-        
-        # Any other format not supported
-        else:
-            raise Exception("Input data format not supported")
+            # For url-encoded data
+            elif contentType == 'application/x-www-form-urlencoded':
+                data = self.data.split('\r\n\r\n')[1]
+                for pair in data.split('&'):
+                    key, value = pair.split('=')
+                    request_body[key] = value
+                return request_body
+            
+            # Any other format not supported
+            else:
+                raise Exception("Input data format not supported")
+        except Exception as e:
+            print(e)
+            return {}
 
 
     def getRequestObject(self):

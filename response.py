@@ -60,12 +60,14 @@ class Response:
             template_path = os.path.join(self.renderPath, page)
             with open(template_path, 'r') as file:
                 template_content = file.read()
-        except FileNotFoundError:
-            return 'not found'
+        except FileNotFoundError as e:
+            print(e)
+            return "Template not found to render"
         try:
             rendered_content = template_content.format(**context)
         except KeyError as e:
-            return 'some error'
+            print('Key error while rendering:', e)
+            return "Key not present"
         response_body = rendered_content
         response_headers = {
             "Content-Type": "text/html",
