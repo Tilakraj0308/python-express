@@ -1,6 +1,7 @@
 import socket
 from threading import Thread
 import select
+import json
 
 class TCPServer:
 
@@ -12,10 +13,18 @@ class TCPServer:
         self.server_socket = None
 
     def process_request(self, data):
-        response = f"Data received: {data}, Data reversed: {data[::-1]}"
-        response_body = f"<html><body><h1>{response}</h1></body></html>"
+        print("I am here")
+        response = f"Data received: data, Data reversed: atad"
+        # response_body = f"<html><body><h1>{response}</h1></body></html>"
+        # response_headers = {
+        #     "Content-Type": "text/html",
+        #     "Connection": "keep-alive",
+        #     "Content-Length": str(len(response_body))
+        # }
+        response_body = {'response': response}
+        response_body = json.dumps(response_body)
         response_headers = {
-            "Content-Type": "text/html",
+            "Content-Type": "application/json",
             "Connection": "keep-alive",
             "Content-Length": str(len(response_body))
         }
@@ -23,6 +32,7 @@ class TCPServer:
         response_line = "HTTP/1.1 200 OK\r\n"
         response_headers_str = "\r\n".join(f"{key}: {value}" for key, value in response_headers.items())
         full_response = response_line + response_headers_str + "\r\n\r\n" + response_body
+        print(full_response)
         return full_response
 
     def request_handler(self, client_socket):
@@ -48,7 +58,7 @@ class TCPServer:
         self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.server_socket.bind((self.host, self.port))
         self.server_socket.listen()
-        print(f"server is now running at {self.host}:{self.port}")
+        print(f"server is now running at http://{self.host}:{self.port}")
         self.running = True
         while self.running:
             try:
