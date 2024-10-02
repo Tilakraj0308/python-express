@@ -1,5 +1,11 @@
 import json
 
+class dotdict(dict):
+    """dot.notation access to dictionary attributes"""
+    __getattr__ = dict.get
+    __setattr__ = dict.__setitem__
+    __delattr__ = dict.__delitem__
+
 class Request:
     def __init__(self, data):
         self.data = data
@@ -11,10 +17,10 @@ class Request:
         return 'text/plain'
     
     def getRequestType(self):
-        return self.data.split(' ')[0]
+        return self.data.split(' ')[0].upper()
     
     def getRoute(self):
-        return self.data.split(' ')[1]
+        return self.data.split(' ')[1].split('?')[0].upper()
 
     def getRequestLine(self):
         request_line = self.data.split('\r\n')[0]
@@ -29,7 +35,7 @@ class Request:
             for query in params:
                 key, value = query.split('=')
                 query_params[key] = value
-            requestLine['query'] = query_params
+            requestLine['query'] = dotdict(query_params)
         return requestLine
 
     def getRequestHeader(self):
@@ -84,7 +90,7 @@ class Request:
 
     def getRequestObject(self):
         request = {}
-        request['request-line'] = self.getRequestLine()
-        request['header'] = self.getRequestHeader()
-        request['body'] = self.getRequestBody()
-        return request
+        request['requestLine'] = dotdict(self.getRequestLine())
+        request['header'] = dotdict(self.getRequestHeader())
+        request['body'] = dotdict(self.getRequestBody())
+        return dotdict(request)

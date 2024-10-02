@@ -16,7 +16,7 @@ class Response:
             '500': 'Internal Server Error',
             '502': 'Bad Gateway'
         }
-        self.status_code = 200
+        self.status_code = '200'
         self.httpVersion = 1.1
         self.setResponseLine()
         self.renderPath = 'templates'
@@ -26,7 +26,8 @@ class Response:
         self.responseLine = f'HTTP/{self.httpVersion} {self.status_code} {status_message}\r\n'
 
     def status(self, status_code):
-        self.status_code = status_code
+        self.status_code = str(status_code)
+        self.setResponseLine()
         return self
     
     def json(self, json_res):
@@ -40,6 +41,19 @@ class Response:
         full_response = self.responseLine + response_headers_str + "\r\n\r\n" + response_body
         self.responseBody = full_response
         return full_response
+    
+    def send(self, message):
+        message = str(message)
+        response_headers = {
+            "Content-Type": "text/plain",
+            "Connection": "keep-alive",
+            "Content-Length": str(len(message))
+        }
+        response_headers_str = "\r\n".join(f"{key}: {value}" for key, value in response_headers.items())
+        full_response = self.responseLine + response_headers_str + "\r\n\r\n" + message
+        self.responseBody = full_response
+        return full_response
+
     
     def render(self, page, context):
         try:

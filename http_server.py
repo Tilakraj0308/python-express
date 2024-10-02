@@ -5,8 +5,6 @@ import signal
 import sys
 
 
-# types = ['multipart/form-data', 'application/x-www-form-urlencoded', 'text/plain']
-
 class HTTPServer(TCPServer):
 
     def __init__(self, host='127.0.0.1', port=8939):
@@ -18,34 +16,18 @@ class HTTPServer(TCPServer):
         self.stop()
         sys.exit(0)
 
-
-# Do not delete --> for later use
     def process_request(self, data):
-        print(data)
-        request = Request(data)
-        req = request.getRequestObject()
-        print(req)
-        res = Response()
-        route = request.getRoute()
-        method = request.getRequestType()
-        if not route in self.routes or not method in self.routes[route]:
-            # 404 not found
-            return
-        self.routes[route][method](req, res)
-        return res
-
-    # def process_request(self, data):
-    #     print(data)
-    #     request = Request(data)
-    #     req = request.getRequestObject()
-    #     print(req)
-    #     # route = request.getRoute()
-    #     # method = request.getRequestType()
-    #     # if not route in self.routes or not method in self.routes[route]:
-    #     #     # 404 not found
-    #     #     return
-    #     # self.routes[route][method](req, res)
-    #     return super().process_request(req["body"])
+        try:
+            request = Request(data)
+            req = request.getRequestObject()
+            res = Response()
+            route = request.getRoute()
+            method = request.getRequestType()
+            if not route in self.routes or not method in self.routes[route]:
+                raise Exception(f'{method} for route {route} not found')
+            return self.routes[route][method](req, res)
+        except Exception as e:
+            return res.status(404).send(e)
 
     def router(self, path, methods):
         if not path in self.routes:
@@ -56,6 +38,7 @@ class HTTPServer(TCPServer):
         return inner
 
     def get(self, path):
+        print("path=", path)
         return self.router(path.upper(), methods=['GET'])
         
     def post(self, path):

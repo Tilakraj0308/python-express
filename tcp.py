@@ -13,33 +13,12 @@ class TCPServer:
         self.server_socket = None
 
     def process_request(self, data):
-        print("I am here")
-        response = f"Data received: data, Data reversed: atad"
-        # response_body = f"<html><body><h1>{response}</h1></body></html>"
-        # response_headers = {
-        #     "Content-Type": "text/html",
-        #     "Connection": "keep-alive",
-        #     "Content-Length": str(len(response_body))
-        # }
-        response_body = {'response': response}
-        response_body = json.dumps(response_body)
-        response_headers = {
-            "Content-Type": "application/json",
-            "Connection": "keep-alive",
-            "Content-Length": str(len(response_body))
-        }
-        
-        response_line = "HTTP/1.1 200 OK\r\n"
-        response_headers_str = "\r\n".join(f"{key}: {value}" for key, value in response_headers.items())
-        full_response = response_line + response_headers_str + "\r\n\r\n" + response_body
-        print(full_response)
-        return full_response
+        pass
 
     def request_handler(self, client_socket):
         while self.running:
             try:
                 ready = select.select([client_socket], [], [], 1.0)
-                print("ready-----------------")
                 print(ready)
                 if ready[0]:
                     data = client_socket.recv(2048)
