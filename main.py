@@ -4,13 +4,13 @@ server = HTTPServer(port=5000)
 
 
 # # HTTP response for html rendering
-# @server.get('/')
-# def home(req, res):
-#     return res.render('home.html', {'name': 'Anish', 'reason': 'fun'})
+@server.get('/')
+def home(req, res):
+    return res.render('home.html', {'name': 'Tilak', 'reason': 'fun'})
 
-# @server.get('/favicon.ico')
-# def far(req, res):
-#     return res.status(400).send('Favicon not found')
+@server.get('/favicon.ico')
+def far(req, res):
+    return res.status(400).send('Favicon not found')
 
 # HTTP response for restful APIs
 users = [{'id': 1, 'name': 'Tilak', 'age': 50}, {'id': 2, 'name': 'Raj', 'age': 100}]
@@ -54,4 +54,4 @@ def delete_user(req, res):
             return res.json({'updated_users': users})
     return res.status(400).send(f'No user with id: {id} found')
 
-server.startServer()
+server.startServer(debug=True)

@@ -1,7 +1,6 @@
 import socket
 from threading import Thread
 import select
-import json
 
 class TCPServer:
 
@@ -19,7 +18,6 @@ class TCPServer:
         while self.running:
             try:
                 ready = select.select([client_socket], [], [], 1.0)
-                print(ready)
                 if ready[0]:
                     data = client_socket.recv(2048)
                     if not data:
@@ -33,9 +31,15 @@ class TCPServer:
         client_socket.close()
 
     def start(self):
+        # Creating socket
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+        # Freeing port instantly after program is stopped
         self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+
+        # Binding the port and host to socket
         self.server_socket.bind((self.host, self.port))
+
         self.server_socket.listen()
         print(f"server is now running at http://{self.host}:{self.port}")
         self.running = True
@@ -50,15 +54,11 @@ class TCPServer:
                     print("Error while accepting socket")
 
     def stop(self):
-        print("Keyboard Interupt")
 
         self.running = False
 
         if self.server_socket:
             self.server_socket.close()
-
-        print("socket closed")
         
         for thread in self.threads:
             thread.join()
-        print("Server stopped")

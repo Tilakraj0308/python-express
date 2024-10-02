@@ -3,6 +3,7 @@ from response import Response
 from tcp import TCPServer
 import signal
 import sys
+import os
 
 
 class HTTPServer(TCPServer):
@@ -10,11 +11,27 @@ class HTTPServer(TCPServer):
     def __init__(self, host='127.0.0.1', port=8939):
         super().__init__(host, port)
         self.routes = {}
+        self.last_modified_time = self.get_last_modified_time()
+
+    def get_last_modified_time(self):
+        return max(os.path.getmtime(f) for f in os.listdir('.') if f.endswith('.py'))
 
     def handle_interrupt(self, signum, frame):
-        print("There is an Interrupt")
-        self.stop()
-        sys.exit(0)
+        if self.debug_mode and signum == signal.SIGALRM:
+            current_modified_time = self.get_last_modified_time()
+            if current_modified_time > self.last_modified_time:
+                print("Code changes detected. Restarting server...")
+                print()
+                self.stop()
+                os.execv(sys.executable, ['python'] + sys.argv)
+            signal.alarm(1)
+        else:
+            print()
+            print("Keyboard Interrupt")
+            print("Stopping the server....")
+            self.stop()
+            print("Server stopped")
+            sys.exit(0)
 
     def process_request(self, data):
         try:
@@ -38,7 +55,6 @@ class HTTPServer(TCPServer):
         return inner
 
     def get(self, path):
-        print("path=", path)
         return self.router(path.upper(), methods=['GET'])
         
     def post(self, path):
@@ -51,8 +67,13 @@ class HTTPServer(TCPServer):
         return self.router(path.upper(), methods=['DELETE'])
 
 
-    def startServer(self):
+    def startServer(self, debug=False):
+        self.debug_mode = debug
         signal.signal(signalnum=signal.SIGINT, handler=self.handle_interrupt)
+        if self.debug_mode:
+            print("Server running in debug mode. Auto-restart is enabled.")
+            signal.signal(signal.SIGALRM, self.handle_interrupt)
+            signal.alarm(1)
         try:
             self.start()
         except KeyboardInterrupt as e:
@@ -60,5 +81,4 @@ class HTTPServer(TCPServer):
             pass
         finally:
             if self.running:
-                print("finally block")
                 self.stop()
