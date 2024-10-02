@@ -1,6 +1,6 @@
-from request import Request
-from response import Response
-from tcp import TCPServer
+from pythonExpress.request import Request
+from pythonExpress.response import Response
+from pythonExpress.tcp import TCPServer
 import signal
 import sys
 import os
