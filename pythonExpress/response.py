@@ -62,7 +62,7 @@ class Response:
                 template_content = file.read()
         except FileNotFoundError as e:
             print(e)
-            return "Template not found to render"
+            return "File not found to render inside templates folder"
         try:
             rendered_content = template_content.format(**context)
         except KeyError as e:
