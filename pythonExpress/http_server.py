@@ -69,6 +69,16 @@ class HTTPServer(TCPServer):
 
     def startServer(self, debug=False):
         self.debug_mode = debug
+        if os.name == 'nt' and debug:
+            print("can't start server in debug mode in windows operating system")
+            print("Starting server in normal mode...")
+            self.debug_mode = False
+        
+        elif os.name != 'posix' and debug:
+            print("Unrecognized operating system")
+            print("Can't start server in debug mode on this os")
+            self.debug_mode = False
+            
         signal.signal(signalnum=signal.SIGINT, handler=self.handle_interrupt)
         if self.debug_mode:
             print("Server running in debug mode. Auto-restart is enabled.")

@@ -1,6 +1,6 @@
 import json
 import os
- 
+
 class Response:
 
     def __init__(self):
