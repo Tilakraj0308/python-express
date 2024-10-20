@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name="pythonExpress",
-    version="1.0.0",
+    version="1.0.1",
     description="Express like syntax to create servers in python",
     author="Tilak raj",
     author_email="tilakraj7050@gmail.com",

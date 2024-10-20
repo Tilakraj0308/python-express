@@ -41,6 +41,7 @@ class TCPServer:
         self.server_socket.bind((self.host, self.port))
 
         self.server_socket.listen()
+        self.server_socket.settimeout(0.1)
         print(f"server is now running at http://{self.host}:{self.port}")
         self.running = True
         while self.running:
@@ -49,6 +50,8 @@ class TCPServer:
                 thread = Thread(target=self.request_handler, args=(client_socket,))
                 thread.start()
                 self.threads.append(thread)
+            except socket.timeout:
+                continue
             except:
                 if self.running:
                     print("Error while accepting socket")
